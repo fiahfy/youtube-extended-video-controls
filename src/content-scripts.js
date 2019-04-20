@@ -1,15 +1,26 @@
 import logger from './utils/logger'
 import className from './constants/class-name'
-import './assets/icon16.png'
-import './assets/icon48.png'
-import './assets/icon128.png'
 
-const createBackwardButton = () => {
+const buttonConfigs = [
+  {
+    path:
+      'M12 5V1L7 6l5 5V7c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6H4c0 4.4 3.6 8 8 8s8-3.6 8-8-3.6-8-8-8zm-1.3 8.9l.2-2.2h2.4v.7h-1.7l-.1.9s.1 0 .1-.1.1 0 .1-.1.1 0 .2 0h.2c.2 0 .4 0 .5.1s.3.2.4.3.2.3.3.5.1.4.1.6c0 .2 0 .4-.1.5s-.1.3-.3.5-.3.2-.4.3-.4.1-.6.1c-.2 0-.4 0-.5-.1s-.3-.1-.5-.2-.2-.2-.3-.4-.1-.3-.1-.5h.8c0 .2.1.3.2.4s.2.1.4.1c.1 0 .2 0 .3-.1l.2-.2s.1-.2.1-.3v-.6l-.1-.2-.2-.2s-.2-.1-.3-.1h-.2s-.1 0-.2.1-.1 0-.1.1-.1.1-.1.1h-.7z',
+    title: 'Seek backward 5s（←）',
+    keyCode: 37,
+    className: className.backwordButton
+  },
+  {
+    path:
+      'M4 13c0 4.4 3.6 8 8 8s8-3.6 8-8h-2c0 3.3-2.7 6-6 6s-6-2.7-6-6 2.7-6 6-6v4l5-5-5-5v4c-4.4 0-8 3.6-8 8zm6.7.9l.2-2.2h2.4v.7h-1.7l-.1.9s.1 0 .1-.1.1 0 .1-.1.1 0 .2 0h.2c.2 0 .4 0 .5.1s.3.2.4.3.2.3.3.5.1.4.1.6c0 .2 0 .4-.1.5s-.1.3-.3.5-.3.2-.5.3-.4.1-.6.1c-.2 0-.4 0-.5-.1s-.3-.1-.5-.2-.2-.2-.3-.4-.1-.3-.1-.5h.8c0 .2.1.3.2.4s.2.1.4.1c.1 0 .2 0 .3-.1l.2-.2s.1-.2.1-.3v-.6l-.1-.2-.2-.2s-.2-.1-.3-.1h-.2s-.1 0-.2.1-.1 0-.1.1-.1.1-.1.1h-.6z',
+    title: 'Seek forward 5s（→）',
+    keyCode: 39,
+    className: className.forwordButton
+  }
+]
+
+const createButton = (config) => {
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-  path.setAttribute(
-    'd',
-    'M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z'
-  )
+  path.setAttribute('d', config.path)
   path.setAttribute('fill', '#fff')
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -19,39 +30,21 @@ const createBackwardButton = () => {
   svg.append(path)
 
   const button = document.createElement('button')
-  button.classList.add(className.controlButton)
+  button.classList.add(config.className)
   button.classList.add('ytp-button')
   button.style.opacity = 0
   button.style.transition = 'opacity .5s'
+  button.title = config.title
   button.onclick = () => {
-    // TODO:
+    const e = new KeyboardEvent('keydown', {
+      bubbles: true,
+      keyCode: config.keyCode
+    })
+    document.body.dispatchEvent(e)
   }
   button.append(svg)
-}
 
-const createForwardButton = () => {
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-  path.setAttribute(
-    'd',
-    'M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z'
-  )
-  path.setAttribute('fill', '#fff')
-
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-  svg.setAttribute('viewBox', '-8 -8 40 40')
-  svg.setAttribute('width', '100%')
-  svg.setAttribute('height', '100%')
-  svg.append(path)
-
-  const button = document.createElement('button')
-  button.classList.add(className.controlButton)
-  button.classList.add('ytp-button')
-  button.style.opacity = 0
-  button.style.transition = 'opacity .5s'
-  button.onclick = () => {
-    // TODO:
-  }
-  button.append(svg)
+  return button
 }
 
 const addControlButtons = () => {
@@ -62,33 +55,37 @@ const addControlButtons = () => {
     return
   }
 
-  const backward = createBackwardButton()
-  const forward = createForwardButton()
-
-  controls.prepend(backward)
-  controls.prepend(forward)
-
-  // fade in...
-  setTimeout(() => {
-    backward.style.opacity = 1
-    forward.style.opacity = 1
-  }, 0)
-}
-
-const removeControlButtons = () => {
-  Array.from(document.querySelectorAll(`.${className.controlButton}`)).forEach(
-    (button) => {
-      button && button.remove()
+  for (let config of buttonConfigs) {
+    if (document.querySelector(`.${config.className}`)) {
+      break
     }
-  )
+    const button = createButton(config)
+    controls.append(button)
+    // fade in...
+    setTimeout(() => {
+      button.style.opacity = 1
+    }, 0)
+  }
 }
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  logger.log('chrome.runtime.onMessage', message, sender, sendResponse)
+
+  const { id, type } = message
+  if (type === 'SIGN_RELOAD' && process.env.NODE_ENV !== 'production') {
+    // reload if files changed
+    parent.location.reload()
+    return
+  }
+  switch (id) {
+    case 'urlChanged':
+      addControlButtons()
+      break
+  }
+})
 
 document.addEventListener('DOMContentLoaded', () => {
   addControlButtons()
-
-  window.addEventListener('unload', () => {
-    removeControlButtons()
-  })
 })
 
 logger.log('content script loaded')

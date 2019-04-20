@@ -8,6 +8,7 @@ export default {
   target: 'web',
   context: `${__dirname}/src`,
   entry: {
+    background: './background',
     'content-scripts': './content-scripts'
   },
   output: {

@@ -1,7 +1,7 @@
 # YouTube Extended Controls
 [![Build Status](https://travis-ci.com/fiahfy/youtube-extended-controls.svg?branch=master)](https://travis-ci.com/fiahfy/youtube-extended-controls)
 
-> Chrome Extension for Extended Controls for Video on YouTube.
+> Chrome Extension for Extended Controls on YouTube Videos.
 
 
 ## Features

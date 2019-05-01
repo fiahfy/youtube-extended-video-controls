@@ -32,9 +32,9 @@ const createButton = (config) => {
   const button = document.createElement('button')
   button.classList.add(config.className)
   button.classList.add('ytp-button')
-  button.style.opacity = 0
   button.style.transition = 'opacity .5s'
   button.title = config.title
+  button.disabled = config.disabled
   button.onclick = () => {
     const e = new KeyboardEvent('keydown', {
       bubbles: true,
@@ -48,6 +48,11 @@ const createButton = (config) => {
 }
 
 const addControlButtons = () => {
+  const bar = document.querySelector(
+    '.ytp-chrome-bottom .ytp-progress-bar-container'
+  )
+  const disabled = !bar || bar.getAttribute('aria-disabled') === 'true'
+
   const controls = parent.document.querySelector(
     '.ytp-chrome-bottom .ytp-chrome-controls .ytp-left-controls'
   )
@@ -59,12 +64,8 @@ const addControlButtons = () => {
     if (document.querySelector(`.${config.className}`)) {
       break
     }
-    const button = createButton(config)
+    const button = createButton({ ...config, disabled })
     controls.append(button)
-    // fade in...
-    setTimeout(() => {
-      button.style.opacity = 1
-    }, 0)
   }
 }
 

@@ -9,7 +9,7 @@ export default {
   context: `${__dirname}/src`,
   entry: {
     background: './background',
-    'content-scripts': './content-scripts'
+    'content-script': './content-script'
   },
   output: {
     path: `${__dirname}/app/`,

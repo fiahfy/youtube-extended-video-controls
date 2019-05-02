@@ -18,6 +18,20 @@ const buttonConfigs = [
   }
 ]
 
+const waitVideoReady = () => {
+  return new Promise((resolve) => {
+    const time = Date.now()
+    const timer = setInterval(() => {
+      const video = document.querySelector('video.html5-main-video')
+      if (Date.now() - time > 3000 || (video && video.readyState === 4)) {
+        clearInterval(timer)
+        resolve()
+        return
+      }
+    }, 100)
+  })
+}
+
 const createButton = (config) => {
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
   path.setAttribute('d', config.path)
@@ -47,7 +61,9 @@ const createButton = (config) => {
   return button
 }
 
-const addControlButtons = () => {
+const addControlButtons = async () => {
+  await waitVideoReady()
+
   const bar = document.querySelector(
     '.ytp-chrome-bottom .ytp-progress-bar-container'
   )
@@ -61,9 +77,9 @@ const addControlButtons = () => {
   }
 
   for (let config of buttonConfigs) {
-    if (document.querySelector(`.${config.className}`)) {
-      break
-    }
+    const oldButton = document.querySelector(`.${config.className}`)
+    oldButton && oldButton.remove()
+
     const button = createButton({ ...config, disabled })
     controls.append(button)
   }

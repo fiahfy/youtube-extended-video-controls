@@ -46,7 +46,6 @@ const createButton = (config) => {
   const button = document.createElement('button')
   button.classList.add(config.className)
   button.classList.add('ytp-button')
-  button.style.transition = 'opacity .5s'
   button.title = config.title
   button.disabled = config.disabled
   button.onclick = () => {

@@ -1,4 +1,4 @@
-import logger from './utils/logger'
+import browser from 'webextension-polyfill'
 import className from './constants/class-name'
 
 const buttonConfigs = [
@@ -18,15 +18,14 @@ const buttonConfigs = [
   }
 ]
 
-const waitVideoReady = () => {
+const videoReady = () => {
   return new Promise((resolve) => {
-    const time = Date.now()
+    const timeout = Date.now() + 3000
     const timer = setInterval(() => {
       const video = document.querySelector('video.html5-main-video')
-      if (Date.now() - time > 3000 || (video && video.readyState === 4)) {
+      if ((video && video.readyState === 4) || Date.now() > timeout) {
         clearInterval(timer)
         resolve()
-        return
       }
     }, 100)
   })
@@ -60,8 +59,8 @@ const createButton = (config) => {
   return button
 }
 
-const addControlButtons = async () => {
-  await waitVideoReady()
+const setupControlButtons = async () => {
+  await videoReady()
 
   const bar = document.querySelector(
     '.ytp-chrome-bottom .ytp-progress-bar-container'
@@ -84,24 +83,19 @@ const addControlButtons = async () => {
   }
 }
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  logger.log('chrome.runtime.onMessage', message, sender, sendResponse)
-
+browser.runtime.onMessage.addListener((message) => {
   const { id, type } = message
   if (type === 'SIGN_RELOAD' && process.env.NODE_ENV !== 'production') {
-    // reload if files changed
     parent.location.reload()
     return
   }
   switch (id) {
     case 'urlChanged':
-      addControlButtons()
+      setupControlButtons()
       break
   }
 })
 
 document.addEventListener('DOMContentLoaded', () => {
-  addControlButtons()
+  setupControlButtons()
 })
-
-logger.log('content script loaded')

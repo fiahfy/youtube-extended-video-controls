@@ -9,9 +9,6 @@ module.exports = {
     node: true,
     es6: true
   },
-  globals: {
-    chrome: true
-  },
   extends: [
     'eslint:recommended',
     'plugin:prettier/recommended'

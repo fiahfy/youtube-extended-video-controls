@@ -3,6 +3,9 @@ import className from './constants/class-name'
 import forward from './assets/forward.svg'
 import replay from './assets/replay.svg'
 
+let timer = null
+let oldSrc = null
+
 const buttonConfigs = [
   {
     svg: replay,
@@ -18,31 +21,11 @@ const buttonConfigs = [
   }
 ]
 
-const getDisabledState = () => {
-  return new Promise((resolve) => {
-    const timeout = Date.now() + 3000
-    const timer = setInterval(() => {
-      const bar = document.querySelector(
-        '.ytp-chrome-bottom .ytp-progress-bar-container'
-      )
-      if (bar) {
-        clearInterval(timer)
-        const disabled = bar.getAttribute('aria-disabled') === 'true'
-        resolve(disabled)
-      } else if (Date.now() > timeout) {
-        clearInterval(timer)
-        resolve(false)
-      }
-    }, 100)
-  })
-}
-
 const createButton = (config) => {
   const button = document.createElement('button')
   button.classList.add(config.className)
   button.classList.add('ytp-button')
   button.title = config.title
-  button.disabled = config.disabled
   button.onclick = () => {
     const e = new KeyboardEvent('keydown', {
       bubbles: true,
@@ -67,14 +50,49 @@ const setupControlButtons = async () => {
     return
   }
 
-  const disabled = await getDisabledState()
+  for (let config of buttonConfigs) {
+    if (document.querySelector(`.${config.className}`)) {
+      return
+    }
+
+    const button = createButton({ ...config })
+    controls.append(button)
+  }
+}
+
+const waitVideoReady = () => {
+  clearInterval(timer)
+
+  return new Promise((resolve) => {
+    const timeout = Date.now() + 10000
+    timer = setInterval(() => {
+      const video = document.querySelector('video.html5-main-video')
+      if (video && video.currentSrc !== oldSrc && video.readyState === 4) {
+        clearInterval(timer)
+        oldSrc = video.currentSrc
+        resolve(true)
+      } else if (Date.now() > timeout) {
+        clearInterval(timer)
+        resolve(false)
+      }
+    })
+  })
+}
+
+const updateSeekButtons = async () => {
+  const ready = await waitVideoReady()
+
+  const bar = document.querySelector(
+    '.ytp-chrome-bottom .ytp-progress-bar-container'
+  )
+  const disabled = bar && bar.getAttribute('aria-disabled') === 'true'
 
   for (let config of buttonConfigs) {
-    const oldButton = document.querySelector(`.${config.className}`)
-    oldButton && oldButton.remove()
-
-    const button = createButton({ ...config, disabled })
-    controls.append(button)
+    const button = document.querySelector(`.${config.className}`)
+    if (!button) {
+      return
+    }
+    button.disabled = ready && disabled
   }
 }
 
@@ -87,10 +105,12 @@ browser.runtime.onMessage.addListener((message) => {
   switch (id) {
     case 'urlChanged':
       setupControlButtons()
+      updateSeekButtons()
       break
   }
 })
 
 document.addEventListener('DOMContentLoaded', () => {
   setupControlButtons()
+  updateSeekButtons()
 })

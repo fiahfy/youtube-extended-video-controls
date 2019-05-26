@@ -5,7 +5,7 @@
 
 
 ## Features
-* Append buttons for seeking backward/forward 5 seconds.
+* Add buttons for seeking backward/forward 5 seconds.
 
 
 ## Screenshots

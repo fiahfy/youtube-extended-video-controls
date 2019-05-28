@@ -42,7 +42,7 @@ const createButton = (config) => {
   return button
 }
 
-const setupControlButtons = async () => {
+const setupControlButtons = () => {
   const controls = parent.document.querySelector(
     '.ytp-chrome-bottom .ytp-chrome-controls .ytp-left-controls'
   )
@@ -96,7 +96,7 @@ const updateSeekButtons = async () => {
   }
 }
 
-browser.runtime.onMessage.addListener((message) => {
+browser.runtime.onMessage.addListener(async (message) => {
   const { id, type } = message
   if (type === 'SIGN_RELOAD' && process.env.NODE_ENV !== 'production') {
     parent.location.reload()
@@ -105,12 +105,12 @@ browser.runtime.onMessage.addListener((message) => {
   switch (id) {
     case 'urlChanged':
       setupControlButtons()
-      updateSeekButtons()
+      await updateSeekButtons()
       break
   }
 })
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   setupControlButtons()
-  updateSeekButtons()
+  await updateSeekButtons()
 })

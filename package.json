@@ -1,7 +1,7 @@
 {
   "name": "youtube-extended-controls",
   "description": "Add Extended Controls on YouTube Videos",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": {
     "name": "fiahfy",
     "email": "d.fiahfy@gmail.com",
@@ -22,7 +22,7 @@
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-prettier": "^3.0.0",
     "file-loader": "^4.0.0",
-    "husky": "^2.2.0",
+    "husky": "^3.0.1",
     "prettier": "^1.14.3",
     "svg-inline-loader": "^0.8.0",
     "webpack": "^4.0.1",

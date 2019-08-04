@@ -81,6 +81,11 @@ const setupControls = () => {
 
 const setupControlsLoop = async () => {
   return new Promise((resolve) => {
+    const video = document.querySelector('video.html5-main-video')
+    if (video) {
+      video.removeEventListener('loadedmetadata', setupControlsLoop)
+    }
+
     if (timer) {
       clearInterval(timer)
     }
@@ -98,14 +103,9 @@ const setupControlsLoop = async () => {
 }
 
 const setup = async () => {
-  let video = document.querySelector('video.html5-main-video')
-  if (video) {
-    video.removeEventListener('loadedmetadata', setupControlsLoop)
-  }
-
   await setupControlsLoop()
 
-  video = document.querySelector('video.html5-main-video')
+  const video = document.querySelector('video.html5-main-video')
   if (!video || video.readyState > 0) {
     return
   }

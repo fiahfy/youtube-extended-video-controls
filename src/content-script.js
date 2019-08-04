@@ -116,11 +116,11 @@ browser.runtime.onMessage.addListener(async (message) => {
   const { id } = message
   switch (id) {
     case 'urlChanged':
-      setup()
+      await setup()
       break
   }
 })
 
 document.addEventListener('DOMContentLoaded', async () => {
-  setup()
+  await setup()
 })

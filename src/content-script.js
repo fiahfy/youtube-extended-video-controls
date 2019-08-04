@@ -4,7 +4,8 @@ import forward from './assets/forward.svg'
 import replay from './assets/replay.svg'
 
 let timer = null
-let oldSrc = null
+let interval = 100
+let timeout = 3000
 
 const buttonConfigs = [
   {
@@ -26,6 +27,7 @@ const createButton = (config) => {
   button.classList.add(config.className)
   button.classList.add('ytp-button')
   button.title = config.title
+  button.disabled = true
   button.onclick = () => {
     const e = new KeyboardEvent('keydown', {
       bubbles: true,
@@ -42,7 +44,7 @@ const createButton = (config) => {
   return button
 }
 
-const setupControlButtons = () => {
+const setupControls = () => {
   const controls = parent.document.querySelector(
     '.ytp-chrome-bottom .ytp-chrome-controls .ytp-left-controls'
   )
@@ -52,61 +54,73 @@ const setupControlButtons = () => {
 
   for (let config of buttonConfigs) {
     if (document.querySelector(`.${config.className}`)) {
-      return
+      continue
     }
 
     const button = createButton({ ...config })
     controls.append(button)
   }
-}
-
-const waitVideoReady = () => {
-  clearInterval(timer)
-
-  return new Promise((resolve) => {
-    const timeout = Date.now() + 10000
-    timer = setInterval(() => {
-      const video = document.querySelector('video.html5-main-video')
-      if (video && video.currentSrc !== oldSrc && video.readyState === 4) {
-        clearInterval(timer)
-        oldSrc = video.currentSrc
-        resolve(true)
-      } else if (Date.now() > timeout) {
-        clearInterval(timer)
-        resolve(false)
-      }
-    })
-  })
-}
-
-const updateSeekButtons = async () => {
-  const ready = await waitVideoReady()
 
   const bar = document.querySelector(
     '.ytp-chrome-bottom .ytp-progress-bar-container'
   )
-  const disabled = bar && bar.getAttribute('aria-disabled') === 'true'
+  if (!bar) {
+    return
+  }
+
+  const disabled = bar.getAttribute('aria-disabled') === 'true'
 
   for (let config of buttonConfigs) {
     const button = document.querySelector(`.${config.className}`)
     if (!button) {
-      return
+      continue
     }
-    button.disabled = ready && disabled
+    button.disabled = disabled
   }
+}
+
+const setupControlsLoop = async () => {
+  return new Promise((resolve) => {
+    if (timer) {
+      clearInterval(timer)
+    }
+
+    const expire = Date.now() + timeout
+    timer = setInterval(() => {
+      if (Date.now() > expire) {
+        clearInterval(timer)
+        resolve()
+        return
+      }
+      setupControls()
+    }, interval)
+  })
+}
+
+const setup = async () => {
+  let video = document.querySelector('video.html5-main-video')
+  if (video) {
+    video.removeEventListener('loadedmetadata', setupControlsLoop)
+  }
+
+  await setupControlsLoop()
+
+  video = document.querySelector('video.html5-main-video')
+  if (!video || video.readyState > 0) {
+    return
+  }
+  video.addEventListener('loadedmetadata', setupControlsLoop)
 }
 
 browser.runtime.onMessage.addListener(async (message) => {
   const { id } = message
   switch (id) {
     case 'urlChanged':
-      setupControlButtons()
-      await updateSeekButtons()
+      setup()
       break
   }
 })
 
 document.addEventListener('DOMContentLoaded', async () => {
-  setupControlButtons()
-  await updateSeekButtons()
+  setup()
 })

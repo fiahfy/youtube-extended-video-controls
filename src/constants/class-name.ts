@@ -1,8 +1,8 @@
-import browser from 'webextension-polyfill'
+import { browser } from 'webextension-polyfill-ts'
 
 const id = 'e' + browser.runtime.id.replace('@', '')
 
-const classNames = ['backwordButton', 'forwordButton']
+const classNames = ['subscriptionButton', 'backwordButton', 'forwordButton']
 
 export default classNames.reduce((carry, className) => {
   const kebabName = className.replace(/([A-Z])/g, (s) => {
@@ -12,4 +12,4 @@ export default classNames.reduce((carry, className) => {
     ...carry,
     [className]: `${id}-${kebabName}`
   }
-}, {})
+}, {}) as { [key: string]: string }

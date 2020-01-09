@@ -1,50 +1,67 @@
-import browser from 'webextension-polyfill'
+import { browser } from 'webextension-polyfill-ts'
 import className from './constants/class-name'
 import forward from './assets/forward.svg'
 import replay from './assets/replay.svg'
 
-let timer = null
-let interval = 100
-let timeout = 3000
+type ButtonConfig = {
+  title: string
+  className: string
+  svg: string
+  key: string
+  code: string
+  keyCode: number
+}
 
-const buttonConfigs = [
+let timer = -1
+const interval = 100
+const timeout = 3000
+
+const buttonConfigs: ButtonConfig[] = [
   {
-    svg: replay,
     title: 'Seek backward 5s（←）',
-    keyCode: 37,
-    className: className.backwordButton
+    className: className.backwordButton,
+    svg: replay,
+    key: 'ArrowLeft',
+    code: 'ArrowLeft',
+    keyCode: 37
   },
   {
-    svg: forward,
     title: 'Seek forward 5s（→）',
-    keyCode: 39,
-    className: className.forwordButton
+    className: className.forwordButton,
+    svg: forward,
+    key: 'ArrowRight',
+    code: 'ArrowRight',
+    keyCode: 39
   }
 ]
 
-const createButton = (config) => {
+const createButton = (config: ButtonConfig): HTMLButtonElement => {
   const button = document.createElement('button')
   button.classList.add(config.className)
   button.classList.add('ytp-button')
   button.title = config.title
   button.disabled = true
-  button.onclick = () => {
+  button.onclick = (): void => {
     const e = new KeyboardEvent('keydown', {
       bubbles: true,
+      key: config.key,
+      code: config.code,
       keyCode: config.keyCode
-    })
-    document.body.dispatchEvent(e)
+    } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+    document.documentElement.dispatchEvent(e)
   }
   button.innerHTML = config.svg
 
   const svg = button.querySelector('svg')
-  svg.setAttribute('viewBox', '-8 -8 40 40')
-  svg.style.fill = 'white'
+  if (svg) {
+    svg.setAttribute('viewBox', '-8 -8 40 40')
+    svg.style.fill = 'white'
+  }
 
   return button
 }
 
-const setupControls = () => {
+const setupControls = (): void => {
   const controls = parent.document.querySelector(
     '.ytp-chrome-bottom .ytp-chrome-controls .ytp-left-controls'
   )
@@ -52,12 +69,12 @@ const setupControls = () => {
     return
   }
 
-  for (let config of buttonConfigs) {
+  for (const config of buttonConfigs) {
     if (document.querySelector(`.${config.className}`)) {
       continue
     }
 
-    const button = createButton({ ...config })
+    const button = createButton(config)
     controls.append(button)
   }
 
@@ -70,17 +87,21 @@ const setupControls = () => {
 
   const disabled = bar.getAttribute('aria-disabled') === 'true'
 
-  for (let config of buttonConfigs) {
-    const button = document.querySelector(`.${config.className}`)
-    if (!button) {
-      continue
-    }
-    button.disabled = disabled
+  for (const config of buttonConfigs) {
+    const button = document.querySelector(
+      `.${config.className}`
+    ) as HTMLButtonElement | null
+    button && (button.disabled = disabled)
   }
 }
 
-const setupControlsLoop = async () => {
+const setupControlsLoop = async (): Promise<void> => {
   return new Promise((resolve) => {
+    const video = document.querySelector('video.html5-main-video')
+    if (video) {
+      video.removeEventListener('loadedmetadata', setupControlsLoop)
+    }
+
     if (timer) {
       clearInterval(timer)
     }
@@ -97,15 +118,12 @@ const setupControlsLoop = async () => {
   })
 }
 
-const setup = async () => {
-  let video = document.querySelector('video.html5-main-video')
-  if (video) {
-    video.removeEventListener('loadedmetadata', setupControlsLoop)
-  }
-
+const setup = async (): Promise<void> => {
   await setupControlsLoop()
 
-  video = document.querySelector('video.html5-main-video')
+  const video = document.querySelector(
+    'video.html5-main-video'
+  ) as HTMLVideoElement | null
   if (!video || video.readyState > 0) {
     return
   }
@@ -116,11 +134,10 @@ browser.runtime.onMessage.addListener(async (message) => {
   const { id } = message
   switch (id) {
     case 'urlChanged':
-      setup()
-      break
+      return await setup()
   }
 })
 
 document.addEventListener('DOMContentLoaded', async () => {
-  setup()
+  await setup()
 })

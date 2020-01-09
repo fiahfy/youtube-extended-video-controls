@@ -1,4 +1,4 @@
-import browser from 'webextension-polyfill'
+import { browser } from 'webextension-polyfill-ts'
 import './assets/icon.png'
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo) => {

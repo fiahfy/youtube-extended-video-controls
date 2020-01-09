@@ -1,7 +1,7 @@
 import { browser } from 'webextension-polyfill-ts'
-import className from './constants/class-name'
-import forward from './assets/forward.svg'
-import replay from './assets/replay.svg'
+import className from '~/constants/class-name'
+import forward from '~/assets/forward.svg'
+import replay from '~/assets/replay.svg'
 
 type ButtonConfig = {
   title: string

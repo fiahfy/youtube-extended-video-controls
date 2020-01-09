@@ -2,7 +2,7 @@
 
 ![badge](https://github.com/fiahfy/youtube-extended-video-controls/workflows/Web%20Extension%20CI/badge.svg)
 
-> Chrome Extension for Extended Controls on YouTube Videos.
+> Chrome Extension for Extended Video Controls on YouTube.
 
 ## Features
 

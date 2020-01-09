@@ -1,6 +1,6 @@
 {
-  "name": "youtube-extended-controls",
-  "description": "Add Extended Controls on YouTube Videos",
+  "name": "youtube-extended-video-controls",
+  "description": "Chrome Extension for Extended Video Controls on YouTube",
   "version": "0.0.8",
   "author": {
     "name": "fiahfy",
@@ -33,10 +33,10 @@
     "youtube"
   ],
   "private": true,
-  "productName": "YouTube Extended Controls",
+  "productName": "Extended Video Controls for YouTube",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fiahfy/youtube-extended-controls"
+    "url": "https://github.com/fiahfy/youtube-extended-video-controls"
   },
   "scripts": {
     "build": "webpack",
